@@ -54,6 +54,8 @@ The project is live and hosted on Render. You can access the interfaces using th
 *   **Customer Menu View (Table 5)**: [https://hidar-restaurant-menu.onrender.com/?table=5](https://hidar-restaurant-menu.onrender.com/?table=5)
 *   **Staff Dashboard**: [https://hidar-restaurant-menu.onrender.com/#/staff](https://hidar-restaurant-menu.onrender.com/#/staff)
     *   *(Note: The Staff login PIN is securely set in the environment variables configuration on Render)*
+*   **Admin Dashboard (Menu Management)**: [https://hidar-restaurant-menu.onrender.com/admin.html](https://hidar-restaurant-menu.onrender.com/admin.html)
+    *   *(Note: Password-protected; credentials set in server environment configurations)*
 
 ---
 
