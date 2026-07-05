@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidar Coffee - Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Extra styles specific to admin page */
+        .admin-login-card {
+            background: var(--cream-bg);
+            border: 1px solid rgba(164, 63, 37, 0.15);
+            border-radius: 12px;
+            padding: 40px 24px;
+            max-width: 400px;
+            width: 100%;
+            margin: 100px auto;
+            text-align: center;
+            box-shadow: 0 10px 30px var(--shadow-subtle);
+        }
+        .admin-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid rgba(164, 63, 37, 0.2);
+            border-radius: 8px;
+            background: var(--cream-paper);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            outline: none;
+        }
+        .admin-input:focus {
+            border-color: var(--terracotta);
+        }
+        .admin-btn {
+            background-color: var(--terracotta);
+            color: var(--cream-bg);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            width: 100%;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        .admin-btn:hover {
+            background-color: var(--terracotta-dark);
+        }
+        .admin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--terracotta);
+            padding-bottom: 12px;
+        }
+        .admin-header h1 {
+            color: var(--navy-purple);
+            font-size: 1.8rem;
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--terracotta);
+            color: var(--terracotta);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            background: var(--terracotta);
+            color: var(--cream-bg);
+        }
+        .admin-section {
+            background: var(--cream-paper);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(164, 63, 37, 0.08);
+        }
+        .admin-sec-title {
+            color: var(--terracotta);
+            font-size: 1.3rem;
+            border-bottom: 1px solid rgba(164, 63, 37, 0.15);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .admin-item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(164, 63, 37, 0.05);
+        }
+        .admin-item-row:last-child {
+            border-bottom: none;
+        }
+        .admin-item-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+        }
+        .admin-price-input {
+            width: 100px;
+            padding: 6px;
+            border: 1px solid rgba(164, 63, 37, 0.2);
+            border-radius: 4px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-align: right;
+            background: var(--cream-bg);
+        }
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .status-toggle input {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--terracotta);
+        }
+        .save-btn {
+            background: var(--navy-purple);
+            color: var(--cream-bg);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.8rem;
+            transition: opacity 0.2s;
+        }
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #2e7d32;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        @media(max-width: 600px) {
+            .admin-item-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                background: var(--cream-bg);
+                padding: 12px;
+                border-radius: 6px;
+                margin-bottom: 12px;
+                border: 1px solid rgba(164, 63, 37, 0.1);
+            }
+            .admin-price-input {
+                width: 100%;
+                text-align: left;
+            }
+            .save-btn {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="paper-overlay"></div>
+
+    <!-- Login Dialog -->
+    <div id="login-container">
+        <div class="admin-login-card">
+            <div class="terracotta-badge-large">
+                <img src="/IMG000.jpg" alt="Logo" class="gate-logo">
+            </div>
+            <h2>Hidar Coffee</h2>
+            <p style="color: var(--muted-plum); font-size: 0.9rem; margin-top: 4px;">Admin Portal</p>
+            <input type="password" id="admin-pass" class="admin-input" placeholder="Password">
+            <button id="login-btn" class="admin-btn">Login</button>
+            <p id="login-error" style="color: var(--terracotta); font-size: 0.85rem; margin-top: 10px; display: none;">Invalid Password</p>
+        </div>
+    </div>
+
+    <!-- Admin Work Area -->
+    <div id="admin-workspace" class="admin-container hidden">
+        <header class="admin-header">
+            <div>
+                <h1>Hidar Menu Manager</h1>
+                <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; color: var(--muted-plum);">Addis Ababa Admin Console</p>
+            </div>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </header>
+
+        <div id="admin-menu-list">
+            <!-- Dynamically populated menu categories -->
+        </div>
+    </div>
+
+    <!-- Status Toast -->
+    <div id="toast" class="toast">Changes saved successfully!</div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
