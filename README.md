@@ -47,26 +47,31 @@ Accessible securely via PIN code authentication. Staff can view, edit, prepare, 
 
 ---
 
-## ⚙️ Installation & Setup
+## 🌐 Live Deployment Links
+
+The project is live and hosted on Render. You can access the interfaces using the links below:
+
+*   **Customer Menu View (Table 5)**: [https://hidar-restaurant-menu.onrender.com/?table=5](https://hidar-restaurant-menu.onrender.com/?table=5)
+*   **Staff Dashboard**: [https://hidar-restaurant-menu.onrender.com/#/staff](https://hidar-restaurant-menu.onrender.com/#/staff)
+    *   *(Note: The Staff login PIN is securely set in the environment variables configuration on Render)*
+
+---
+
+## ⚙️ Installation & Local Setup
 
 1.  **Clone or Open** this workspace directory.
 2.  Install dependencies:
     ```bash
     npm install
     ```
-3.  Ensure your environment variables are configured in `.env` (already provided in the root directory):
-    ```env
-    PORT=3000
-    STAFF_PIN=1234
-    ADMIN_PASS=HidarAdmin2026
-    ```
+3.  Ensure your environment variables are configured in `.env` (refer to the environment setup instructions on deployment).
 4.  Start the local server:
     ```bash
     npm start
     ```
 5.  Open your browser and navigate to:
     *   **Customer View**: `http://localhost:3000/?table=5`
-    *   **Staff Dashboard**: `http://localhost:3000/#/staff` (Login PIN: `1234`)
+    *   **Staff Dashboard**: `http://localhost:3000/#/staff`
 
 ---
 
@@ -78,7 +83,7 @@ Hidar restaurant menu/
 │   ├── index.html          # Main HTML structure (Menu, Tracking, and Staff views)
 │   ├── style.css           # Vanilla CSS (custom properties, responsive layout)
 │   └── app.js              # SPA router, API calls, state management, and real-time polling
-├── .env                    # System configurations (Staff PIN, Admin password)
+├── .env.example            # Sample system configuration (excluding actual credentials)
 ├── server.js               # Node.js + Express backend server
 ├── menu_db.json            # Menu database (Categories, dishes, prices, and status tags)
 └── orders_db.json          # Persistent order database (records customer orders)
@@ -86,4 +91,5 @@ Hidar restaurant menu/
 
 ---
 Developed for **Hidar Coffee** — Addis Ababa, Ethiopia.
+
 
