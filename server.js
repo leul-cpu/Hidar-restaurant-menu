@@ -25,6 +25,11 @@ const DB_FILE = path.join(__dirname, 'menu_db.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'HidarAdmin2026';
 const TOKEN_SECRET = 'hidar-secret-auth-token-12345';
 
+// In-memory caches for performance optimization
+let menuCache = null;
+let ordersCache = null;
+let itemMap = new Map(); // O(1) lookup for menu items by ID
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -33,11 +38,25 @@ app.get('/IMG000.jpg', (req, res) => {
   res.sendFile(path.join(__dirname, 'IMG000.jpg'));
 });
 
+// Helper to build a flat map of menu items for O(1) lookup
+function buildItemMap() {
+  if (!menuCache || !menuCache.categories) return;
+  itemMap.clear();
+  for (const category of menuCache.categories) {
+    for (const item of category.items) {
+      itemMap.set(item.id, item);
+    }
+  }
+}
+
 // Helper to read menu database
 function readMenu() {
+  if (menuCache) return menuCache;
   try {
     const data = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(data);
+    menuCache = JSON.parse(data);
+    buildItemMap();
+    return menuCache;
   } catch (error) {
     console.error('Error reading DB:', error);
     return { categories: [] };
@@ -48,6 +67,8 @@ function readMenu() {
 function writeMenu(data) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+    menuCache = data;
+    buildItemMap();
     return true;
   } catch (error) {
     console.error('Error writing DB:', error);
@@ -60,13 +81,16 @@ const STAFF_PIN = process.env.STAFF_PIN || '1234';
 
 // Helper to read orders database
 function readOrders() {
+  if (ordersCache) return ordersCache;
   try {
     if (!fs.existsSync(ORDERS_FILE)) {
       fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2), 'utf8');
+      ordersCache = [];
       return [];
     }
     const data = fs.readFileSync(ORDERS_FILE, 'utf8');
-    return JSON.parse(data);
+    ordersCache = JSON.parse(data);
+    return ordersCache;
   } catch (error) {
     console.error('Error reading Orders DB:', error);
     return [];
@@ -77,6 +101,7 @@ function readOrders() {
 function writeOrders(data) {
   try {
     fs.writeFileSync(ORDERS_FILE, JSON.stringify(data, null, 2), 'utf8');
+    ordersCache = data;
     return true;
   } catch (error) {
     console.error('Error writing Orders DB:', error);
@@ -108,20 +133,15 @@ app.post('/api/admin/menu', (req, res) => {
 
   const { itemId, name, price, available } = req.body;
   const menu = readMenu();
-  let found = false;
 
-  for (let cat of menu.categories) {
-    const item = cat.items.find(i => i.id === itemId);
-    if (item) {
-      if (name !== undefined) item.name = name;
-      if (price !== undefined) item.price = Number(price);
-      if (available !== undefined) item.available = Boolean(available);
-      found = true;
-      break;
-    }
-  }
+  // Optimization: use O(1) itemMap lookup instead of O(N*M) nested loops
+  const item = itemMap.get(itemId);
 
-  if (found) {
+  if (item) {
+    if (name !== undefined) item.name = name;
+    if (price !== undefined) item.price = Number(price);
+    if (available !== undefined) item.available = Boolean(available);
+
     if (writeMenu(menu)) {
       res.json({ success: true, message: 'Item updated successfully' });
     } else {
@@ -145,11 +165,8 @@ app.post('/api/orders', (req, res) => {
   let total = 0;
 
   for (let orderItem of items) {
-    let menuItem = null;
-    for (let cat of menu.categories) {
-      menuItem = cat.items.find(i => i.id === orderItem.itemId);
-      if (menuItem) break;
-    }
+    // Optimization: use O(1) itemMap lookup instead of O(N*M) nested loops
+    const menuItem = itemMap.get(orderItem.itemId);
 
     if (!menuItem || !menuItem.available) {
       return res.status(400).json({ success: false, message: `Item ${orderItem.itemId} is unavailable` });
@@ -240,6 +257,10 @@ app.post('/api/orders/:orderId/status', (req, res) => {
     res.status(404).json({ success: false, message: 'Order not found' });
   }
 });
+
+// Warm up the caches on startup
+readMenu();
+readOrders();
 
 app.listen(PORT, () => {
   console.log(`Hidar Coffee server running at http://localhost:${PORT}`);
