@@ -41,9 +41,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // App State
     let menuData = null;
+    let menuItemMap = new Map(); // O(1) lookup for menu items by ID
     let cart = {}; // itemId -> quantity
     let activePollInterval = null;
     let currentStaffTab = 'active'; // 'active' or 'served'
+
+    // Helper: Debounce function to limit execution rate
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
 
     // ==========================================================================
     // Routing & SPA View Manager
@@ -94,11 +104,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     // Main Menu & Cart Flow
     // ==========================================================================
+    function buildMenuItemMap() {
+        if (!menuData || !menuData.categories) return;
+        menuItemMap.clear();
+        menuData.categories.forEach(category => {
+            category.items.forEach(item => {
+                menuItemMap.set(item.id, item);
+            });
+        });
+    }
+
     async function loadMenu() {
         try {
             const response = await fetch('/api/menu');
             if (!response.ok) throw new Error('Network response was not ok');
             menuData = await response.json();
+            buildMenuItemMap();
             renderMenu(menuData);
             setupScrollSpy();
         } catch (error) {
@@ -251,12 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const qty = cart[itemId];
             totalCount += qty;
             
-            // Find item price
-            let foundItem = null;
-            for (let cat of menuData.categories) {
-                foundItem = cat.items.find(i => i.id === itemId);
-                if (foundItem) break;
-            }
+            // Optimization: Use O(1) menuItemMap lookup instead of O(N*M) nested loops
+            const foundItem = menuItemMap.get(itemId);
             if (foundItem) {
                 totalPrice += foundItem.price * qty;
             }
@@ -288,11 +305,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let itemId in cart) {
             const qty = cart[itemId];
-            let menuItem = null;
-            for (let cat of menuData.categories) {
-                menuItem = cat.items.find(i => i.id === itemId);
-                if (menuItem) break;
-            }
+
+            // Optimization: Use O(1) menuItemMap lookup instead of O(N*M) nested loops
+            const menuItem = menuItemMap.get(itemId);
 
             if (menuItem) {
                 const rowTotal = menuItem.price * qty;
@@ -370,17 +385,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Search bar functionality
-    searchInput.addEventListener('input', (e) => {
+    // Search bar functionality with debounce and optimized filtering
+    searchInput.addEventListener('input', debounce((e) => {
         const query = e.target.value.toLowerCase().trim();
         if (!menuData) return;
 
-        const filteredCategories = JSON.parse(JSON.stringify(menuData.categories));
-        filteredCategories.forEach(category => {
-            category.items = category.items.filter(item => 
+        // Optimization: Use Map/Filter structure instead of expensive JSON deep clone
+        const filteredCategories = menuData.categories.map(category => ({
+            ...category,
+            items: category.items.filter(item =>
                 item.name.toLowerCase().includes(query)
-            );
-        });
+            )
+        }));
 
         menuSections.innerHTML = '';
         filteredCategories.forEach(category => {
@@ -453,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             section.appendChild(itemsContainer);
             menuSections.appendChild(section);
         });
-    });
+    }, 250));
 
     // ScrollSpy highlighter logic
     function setupScrollSpy() {
