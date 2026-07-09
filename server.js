@@ -216,7 +216,21 @@ app.get('/api/orders', (req, res) => {
   if (pin !== STAFF_PIN) {
     return res.status(403).json({ success: false, message: 'Unauthorized staff access' });
   }
-  res.json(readOrders());
+
+  // Optimization: Server-side filtering to reduce payload size as order history grows
+  const { tab } = req.query;
+  let orders = readOrders();
+
+  if (tab === 'active') {
+    orders = orders.filter(order => order.status !== 'served');
+  } else if (tab === 'served') {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    orders = orders.filter(order => {
+      return order.status === 'served' && new Date(order.timestamp) >= twentyFourHoursAgo;
+    });
+  }
+
+  res.json(orders);
 });
 
 // Get single order status (Customer view)
