@@ -5,3 +5,7 @@
 ## 2026-07-09 - [Frontend: Efficient Filtering vs. Deep Cloning]
 **Learning:** Using `JSON.parse(JSON.stringify())` for simple filtering in a single-page application (SPA) causes significant CPU spikes and memory churn on every keystroke. Modern `.map()` and `.filter()` with spread operators (`...`) are vastly more efficient for creating the necessary partial structures without the serialization overhead.
 **Action:** Prefer shallow structure replication using `.map()` and object spreads over full deep cloning when preparing filtered views of data.
+
+## 2026-07-09 - [Server-side Filtering for Large Payloads]
+**Learning:** For dashboards with high polling frequencies (e.g., 3s), client-side filtering of potentially large datasets (like order history) creates unnecessary network overhead and CPU churn. Moving filtering logic to the server significantly reduces payload size and browser memory usage.
+**Action:** Always consider the growth of a data set. Implement server-side filtering for endpoints that power real-time dashboards to ensure the application remains snappy even as the database grows.

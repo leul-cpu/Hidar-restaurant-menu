@@ -701,7 +701,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadStaffOrders() {
         try {
-            const res = await fetch('/api/orders', {
+            // Optimization: Fetch only pre-filtered data from server
+            const res = await fetch(`/api/orders?tab=${currentStaffTab}`, {
                 headers: { 'x-staff-pin': staffPin }
             });
             if (!res.ok) throw new Error('Failed to load orders');
@@ -716,20 +717,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderStaffOrders(orders) {
         staffOrdersList.innerHTML = '';
         
-        // Filter orders by active tab
-        const filtered = orders.filter(order => {
-            if (currentStaffTab === 'active') {
-                return order.status !== 'served';
-            } else {
-                // Show served orders only from the last 24 hours
-                if (order.status !== 'served') return false;
-                const hoursElapsed = (new Date() - new Date(order.timestamp)) / 3600000;
-                return hoursElapsed <= 24;
-            }
-        });
-
         // Sort: pending first, then preparing, then ready, served by date desc
-        filtered.sort((a, b) => {
+        // Server already filtered the orders by tab
+        orders.sort((a, b) => {
             if (currentStaffTab === 'active') {
                 const priority = { pending: 0, preparing: 1, ready: 2 };
                 return priority[a.status] - priority[b.status] || new Date(b.timestamp) - new Date(a.timestamp);
@@ -737,7 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return new Date(b.timestamp) - new Date(a.timestamp);
         });
 
-        if (filtered.length === 0) {
+        if (orders.length === 0) {
             staffOrdersList.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: var(--muted-plum);">
                     <p>No orders in this section.</p>
@@ -746,7 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        filtered.forEach(order => {
+        orders.forEach(order => {
             const card = document.createElement('div');
             card.className = `staff-order-card ${order.status}`;
             
