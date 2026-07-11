@@ -9,3 +9,7 @@
 ## 2026-07-09 - [Server-side Filtering for Large Payloads]
 **Learning:** For dashboards with high polling frequencies (e.g., 3s), client-side filtering of potentially large datasets (like order history) creates unnecessary network overhead and CPU churn. Moving filtering logic to the server significantly reduces payload size and browser memory usage.
 **Action:** Always consider the growth of a data set. Implement server-side filtering for endpoints that power real-time dashboards to ensure the application remains snappy even as the database grows.
+
+## 2026-07-10 - [Frontend: Native Image Lazy Loading]
+**Learning:** High-resolution images (like Unsplash category banners) are the largest contributors to page weight. Eagerly loading all category images on a single-page application (SPA) wastes bandwidth and degrades initial rendering performance, especially on mobile networks in Addis Ababa.
+**Action:** Implement `loading="lazy"` on all off-screen or dynamic images to defer network requests until they are needed, significantly improving the time-to-interactive and reducing data usage.

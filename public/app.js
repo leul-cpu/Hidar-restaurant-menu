@@ -180,6 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (category.image) {
                 const img = document.createElement('img');
                 img.className = 'category-banner';
+                // ⚡ Bolt: Use native lazy loading to defer off-screen banner images,
+                // reducing initial payload and improving Largest Contentful Paint (LCP) for mobile users.
+                img.loading = 'lazy';
                 img.src = category.image;
                 img.alt = category.name;
                 section.appendChild(img);
@@ -417,6 +420,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (category.image) {
                 const img = document.createElement('img');
                 img.className = 'category-banner';
+                // ⚡ Bolt: Use native lazy loading to defer off-screen banner images,
+                // reducing initial payload and improving Largest Contentful Paint (LCP) for mobile users.
+                img.loading = 'lazy';
                 img.src = category.image;
                 img.alt = category.name;
                 section.appendChild(img);
