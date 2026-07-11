@@ -29,6 +29,8 @@ const TOKEN_SECRET = 'hidar-secret-auth-token-12345';
 let menuCache = null;
 let ordersCache = null;
 let itemMap = new Map(); // O(1) lookup for menu items by ID
+let ordersMap = new Map(); // O(1) lookup for orders by ID
+let activeOrdersCache = null; // Cache for pre-filtered active orders
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -79,6 +81,17 @@ function writeMenu(data) {
 const ORDERS_FILE = path.join(__dirname, 'orders_db.json');
 const STAFF_PIN = process.env.STAFF_PIN || '1234';
 
+// Helper to build order lookup maps and caches
+function buildOrdersCache() {
+  if (!ordersCache) return;
+  ordersMap.clear();
+  for (const order of ordersCache) {
+    ordersMap.set(order.id, order);
+  }
+  // Pre-calculate active orders for the frequently polled staff dashboard
+  activeOrdersCache = ordersCache.filter(order => order.status !== 'served');
+}
+
 // Helper to read orders database
 function readOrders() {
   if (ordersCache) return ordersCache;
@@ -86,10 +99,12 @@ function readOrders() {
     if (!fs.existsSync(ORDERS_FILE)) {
       fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2), 'utf8');
       ordersCache = [];
+      buildOrdersCache();
       return [];
     }
     const data = fs.readFileSync(ORDERS_FILE, 'utf8');
     ordersCache = JSON.parse(data);
+    buildOrdersCache();
     return ordersCache;
   } catch (error) {
     console.error('Error reading Orders DB:', error);
@@ -102,6 +117,7 @@ function writeOrders(data) {
   try {
     fs.writeFileSync(ORDERS_FILE, JSON.stringify(data, null, 2), 'utf8');
     ordersCache = data;
+    buildOrdersCache();
     return true;
   } catch (error) {
     console.error('Error writing Orders DB:', error);
@@ -222,7 +238,9 @@ app.get('/api/orders', (req, res) => {
   let orders = readOrders();
 
   if (tab === 'active') {
-    orders = orders.filter(order => order.status !== 'served');
+    // ⚡ Bolt: Return pre-filtered active orders cache for O(1) response
+    // since this endpoint is polled every 3 seconds by the staff dashboard.
+    return res.json(activeOrdersCache || []);
   } else if (tab === 'served') {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     orders = orders.filter(order => {
@@ -235,8 +253,9 @@ app.get('/api/orders', (req, res) => {
 
 // Get single order status (Customer view)
 app.get('/api/orders/:orderId', (req, res) => {
-  const orders = readOrders();
-  const order = orders.find(o => o.id === req.params.orderId);
+  readOrders();
+  // ⚡ Bolt: Use O(1) ordersMap lookup instead of O(N) find
+  const order = ordersMap.get(req.params.orderId);
   if (order) {
     res.json(order);
   } else {
@@ -258,7 +277,8 @@ app.post('/api/orders/:orderId/status', (req, res) => {
   }
 
   const orders = readOrders();
-  const order = orders.find(o => o.id === req.params.orderId);
+  // ⚡ Bolt: Use O(1) ordersMap lookup instead of O(N) find
+  const order = ordersMap.get(req.params.orderId);
 
   if (order) {
     order.status = status;
