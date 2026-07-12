@@ -536,6 +536,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Update timeline status steps
                 updateTimelineSteps(order.status);
+
+                // ⚡ Bolt: Stop polling once the order is served to save client & server resources.
+                if (order.status === 'served' && activePollInterval) {
+                    clearInterval(activePollInterval);
+                    activePollInterval = null;
+                }
             } catch (err) {
                 console.error(err);
                 trackOrderId.textContent = 'Not Found';

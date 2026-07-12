@@ -13,3 +13,7 @@
 ## 2026-07-10 - [Frontend: Native Image Lazy Loading]
 **Learning:** High-resolution images (like Unsplash category banners) are the largest contributors to page weight. Eagerly loading all category images on a single-page application (SPA) wastes bandwidth and degrades initial rendering performance, especially on mobile networks in Addis Ababa.
 **Action:** Implement `loading="lazy"` on all off-screen or dynamic images to defer network requests until they are needed, significantly improving the time-to-interactive and reducing data usage.
+
+## 2026-07-11 - [O(1) Order Management & Polling Termination]
+**Learning:** In a high-polling environment (staff dashboard every 3s), repeated $O(N)$ operations on the order list create a measurable CPU bottleneck. Furthermore, continuous client polling for completed ('served') orders wastes resources on both ends.
+**Action:** Introduce in-memory `Map` for $O(1)$ order lookups and a pre-calculated cache for the "active" order dashboard. Terminate customer-side polling as soon as an order reaches the terminal 'served' state.
