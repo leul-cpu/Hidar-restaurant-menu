@@ -17,3 +17,7 @@
 ## 2026-07-11 - [O(1) Order Management & Polling Termination]
 **Learning:** In a high-polling environment (staff dashboard every 3s), repeated $O(N)$ operations on the order list create a measurable CPU bottleneck. Furthermore, continuous client polling for completed ('served') orders wastes resources on both ends.
 **Action:** Introduce in-memory `Map` for $O(1)$ order lookups and a pre-calculated cache for the "active" order dashboard. Terminate customer-side polling as soon as an order reaches the terminal 'served' state.
+
+## 2026-07-13 - [Browser Caching for Static Assets]
+**Learning:** Serving static assets without Cache-Control headers causes redundant network requests and increases TTFB for returning users. Express default middleware uses `max-age=0`, which forces a revalidation request even if the file hasn't changed.
+**Action:** Implement `express.static` with `maxAge` for assets while keeping `must-revalidate` for HTML entry points to ensure SPA updates are not blocked by stale caches.
