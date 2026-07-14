@@ -32,7 +32,7 @@ Accessible securely via PIN code authentication. Staff can view, edit, prepare, 
 *   **Persistent Table ID Routing**: Simply append `?table=X` to the URL.
 *   **One-Tap Order Status Tracking**: The "Track Status" button in the header remembers the customer's last order (via `localStorage`) and shows a horizontal, live-updating progress tracker (Placed → Preparing → Ready → Served).
 *   **Staff Dashboard (`#/staff`)**:
-    *   Protected by a secure 4-digit PIN (`1234`).
+    *   Protected by a secure 4-digit PIN.
     *   Manages live orders using a clear Kanban workflow (Accept → Prepare → Serve).
     *   **Served History Tab**: Automatically filters and displays served orders from only the last 24 hours to keep the UI clean, while safely keeping older entries saved inside the database file.
 *   **Zero-Dependency Light Database**: Uses JSON files for flat-file persistence.
