@@ -22,8 +22,8 @@ if (fs.existsSync(envPath)) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'menu_db.json');
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'HidarAdmin2026';
-const TOKEN_SECRET = 'hidar-secret-auth-token-12345';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MadigaAdmin2026';
+const TOKEN_SECRET = 'madiga-secret-auth-token-12345';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
