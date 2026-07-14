@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hidar Coffee - Digital Menu & Tracking</title>
+    <title>Madiga - Digital Menu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -14,37 +14,14 @@
     <div class="paper-overlay"></div>
     
     <!-- Translucent watermark -->
-    <div class="watermark">HIDAR</div>
+    <div class="watermark">MADIGA</div>
 
-    <!-- QR Gated Overlay (shown when table token is missing) -->
-    <div id="qr-gate" class="gate-overlay hidden">
-        <div class="gate-content">
-            <div class="terracotta-badge-large">
-                <img src="/IMG000.jpg" alt="Hidar Coffee Logo" class="gate-logo">
-            </div>
-            <h1>Welcome to Hidar Coffee</h1>
-            <p class="gate-subtitle">Addis Ababa, Ethiopia</p>
-            <div class="gate-divider"></div>
-            <p class="gate-message">Please scan the QR code on your table to view our digital menu and place your order.</p>
-            <p class="gate-hint">Or consult a member of our waitstaff for assistance.</p>
-        </div>
-    </div>
-
-    <!-- VIEW 1: Main Menu & Cart -->
-    <div id="menu-app" class="app-container hidden">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="logo-container">
-                <div class="terracotta-badge">
-                    <img src="/IMG000.jpg" alt="Hidar Coffee Logo" class="menu-logo">
-                </div>
-                <h1 class="brand-title">HIDAR</h1>
-            </div>
-            <div class="table-info" style="display: flex; flex-direction: row; gap: 12px; align-items: center; border: none; background: transparent; padding: 0;">
-                <div class="table-badge-container" style="display: flex; flex-direction: column;">
-                    <span class="table-label">Table</span>
-                    <span id="table-number" class="table-val">-</span>
-                </div>
+    <!-- Main Menu App Container -->
+    <div id="menu-app" class="app-container">
+        <!-- Hero Section -->
+        <header class="hero-section">
+            <div class="logo-overlay">
+                <img src="/madiga_logo.png" alt="Madiga Logo Icon" class="hero-logo-icon">
             </div>
         </header>
 
@@ -64,216 +41,16 @@
             <div id="menu-sections" class="menu-sections-container">
                 <div class="loading-state">
                     <div class="spinner"></div>
-                    <p>Loading Hidar Menu...</p>
+                    <p>Loading Madiga Menu...</p>
                 </div>
             </div>
         </main>
-
-        <!-- Floating Cart Bar -->
-        <div id="cart-bar" class="cart-bar hidden">
-            <div class="cart-bar-content">
-                <span id="cart-count">0 items selected</span>
-                <button id="view-cart-btn" class="cart-action-btn">View Cart & Order</button>
-            </div>
-        </div>
-
-        <!-- Cart Modal -->
-        <div id="cart-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Your Order Details</h2>
-                    <button id="close-cart-btn" class="close-modal-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div id="cart-items-list" class="cart-items-scroll">
-                        <!-- Dynamic cart items go here -->
-                    </div>
-                    <div class="cart-total-summary">
-                        <span>Total:</span>
-                        <span id="cart-total-price">0 ETB</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="submit-order-btn" class="order-btn">Submit Order</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Track Order Lookup Modal -->
-        <div id="track-order-modal" class="modal-overlay hidden">
-            <div class="modal-content" style="max-height: 90vh;">
-                <div class="modal-header">
-                    <h2>Track Your Order</h2>
-                    <button id="close-track-modal-btn" class="close-modal-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; color: var(--muted-plum); margin-bottom: 16px;">
-                        Here's the latest status of your order.
-                    </p>
-                    <div id="track-modal-result" class="hidden">
-                        <div class="tracking-order-header" style="margin-bottom: 20px;">
-                            <div>
-                                <span class="tracking-id-label">Order Reference</span>
-                                <h3 id="modal-track-id" class="tracking-id-val" style="font-size: 1.3rem;">-</h3>
-                            </div>
-                            <div style="text-align: right;">
-                                <span class="table-label">Table</span>
-                                <div id="modal-track-table" class="table-val">-</div>
-                            </div>
-                        </div>
-
-                        <!-- Mini timeline (horizontal-style) -->
-                        <div class="modal-timeline">
-                            <div class="modal-step" id="modal-step-pending">
-                                <div class="modal-step-dot"></div>
-                                <span class="modal-step-label">Placed</span>
-                            </div>
-                            <div class="modal-step-line"></div>
-                            <div class="modal-step" id="modal-step-preparing">
-                                <div class="modal-step-dot"></div>
-                                <span class="modal-step-label">Preparing</span>
-                            </div>
-                            <div class="modal-step-line"></div>
-                            <div class="modal-step" id="modal-step-ready">
-                                <div class="modal-step-dot"></div>
-                                <span class="modal-step-label">Ready</span>
-                            </div>
-                            <div class="modal-step-line"></div>
-                            <div class="modal-step" id="modal-step-served">
-                                <div class="modal-step-dot"></div>
-                                <span class="modal-step-label">Served</span>
-                            </div>
-                        </div>
-
-                        <div class="tracking-summary-box" style="margin-top: 20px;">
-                            <h3>Items</h3>
-                            <ul id="modal-track-items" class="track-items-list"></ul>
-                            <div class="track-total">
-                                <span>Total:</span>
-                                <span id="modal-track-total">-</span>
-                            </div>
-                        </div>
-                        <button id="modal-open-full-tracking" class="order-btn" style="margin-top: 16px; background: var(--navy-purple);">
-                            View Full Tracking Page
-                        </button>
-                    </div>
-
-                    <div id="track-modal-error" class="hidden" style="text-align: center; padding: 24px; color: var(--terracotta); font-family: 'Plus Jakarta Sans', sans-serif;">
-                        Order not found. Please check the order reference and try again.
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Floating Track Status Button (bottom-left) -->
-        <button id="track-order-header-btn" class="floating-track-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
-            Track Status
-        </button>
 
         <!-- Footer -->
         <footer class="app-footer">
-            <p>© 2026 Hidar Coffee. All rights reserved.</p>
-            <p class="location-stamp">Bole, Addis Ababa</p>
+            <p>© 2026 Madiga Cafe & Restaurant. All rights reserved.</p>
+            <p class="location-stamp">Addis Ababa, Ethiopia</p>
         </footer>
-    </div>
-
-    <!-- VIEW 2: Order Tracking View -->
-    <div id="order-tracking-app" class="app-container hidden">
-        <header class="app-header">
-            <div class="logo-container">
-                <div class="terracotta-badge">
-                    <img src="/IMG000.jpg" alt="Logo" class="menu-logo">
-                </div>
-            </div>
-            <div>
-                <h1 style="font-size: 1.2rem; color: var(--navy-purple); font-weight: 800;">Order Status</h1>
-            </div>
-        </header>
-        <main class="menu-main">
-            <div class="tracking-card">
-                <div class="tracking-order-header">
-                    <div>
-                        <span class="tracking-id-label">Order Reference</span>
-                        <h2 id="track-order-id" class="tracking-id-val">-</h2>
-                    </div>
-                    <div class="table-info" style="box-shadow: none; border: none; background: transparent;">
-                        <span class="table-label">Table</span>
-                        <span id="track-table-number" class="table-val">-</span>
-                    </div>
-                </div>
-
-                <div class="tracking-status-timeline">
-                    <div class="timeline-step" id="step-pending">
-                        <div class="step-dot">1</div>
-                        <div class="step-label">Placed</div>
-                        <div class="step-desc">Received by kitchen staff</div>
-                    </div>
-                    <div class="timeline-step" id="step-preparing">
-                        <div class="step-dot">2</div>
-                        <div class="step-label">Preparing</div>
-                        <div class="step-desc">Hidar chef is cooking your meal</div>
-                    </div>
-                    <div class="timeline-step" id="step-ready">
-                        <div class="step-dot">3</div>
-                        <div class="step-label">Ready</div>
-                        <div class="step-desc">Ready for table delivery</div>
-                    </div>
-                    <div class="timeline-step" id="step-served">
-                        <div class="step-dot">4</div>
-                        <div class="step-label">Served</div>
-                        <div class="step-desc">Delivered to your table</div>
-                    </div>
-                </div>
-
-                <div class="tracking-summary-box">
-                    <h3>Items in Order</h3>
-                    <ul id="track-items-list" class="track-items-list">
-                        <!-- Dynamic -->
-                    </ul>
-                    <div class="track-total">
-                        <span>Total:</span>
-                        <span id="track-total-price">-</span>
-                    </div>
-                </div>
-                <button id="track-back-btn" class="nav-item" style="margin-top: 20px; display: inline-block; width: 100%; text-align: center;">Back to Menu</button>
-            </div>
-        </main>
-    </div>
-
-    <!-- VIEW 3: Staff Dashboard View -->
-    <div id="staff-dashboard-app" class="app-container hidden">
-        <!-- Login Form -->
-        <div id="staff-login-container" class="admin-login-card" style="margin: 60px auto;">
-            <div class="terracotta-badge-large">
-                <img src="/IMG000.jpg" alt="Logo" class="gate-logo">
-            </div>
-            <h2>Staff Console</h2>
-            <p style="color: var(--muted-plum); font-size: 0.9rem; margin-top: 4px;">Real-Time Order Flow</p>
-            <input type="password" id="staff-pin-input" class="admin-input" placeholder="Enter Staff PIN">
-            <button id="staff-login-btn" class="admin-btn">Login</button>
-            <p id="staff-login-error" style="color: var(--terracotta); font-size: 0.85rem; margin-top: 10px; display: none;">Invalid PIN</p>
-        </div>
-
-        <!-- Dashboard Workspace -->
-        <div id="staff-workspace" class="hidden">
-            <header class="app-header">
-                <div>
-                    <h1 style="font-size: 1.4rem; color: var(--navy-purple); font-weight: 800;">Staff Dashboard</h1>
-                    <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; color: var(--muted-plum);">Live Order Pipeline</p>
-                </div>
-                <button id="staff-logout-btn" class="logout-btn">Logout</button>
-            </header>
-            <main class="menu-main">
-                <div class="staff-tabs">
-                    <button class="staff-tab-btn active" data-tab="active">Active Orders</button>
-                    <button class="staff-tab-btn" data-tab="served">Served History</button>
-                </div>
-                <div id="staff-orders-list" class="staff-orders-container">
-                    <!-- Dynamic live orders -->
-                </div>
-            </main>
-        </div>
     </div>
 
     <script src="app.js"></script>

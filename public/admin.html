@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hidar Coffee - Admin Dashboard</title>
+    <title>Madiga - Admin Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -63,6 +63,7 @@
             margin-bottom: 30px;
             border-bottom: 2px solid var(--terracotta);
             padding-bottom: 12px;
+            position: relative;
         }
         .admin-header h1 {
             color: var(--navy-purple);
@@ -195,10 +196,8 @@
     <!-- Login Dialog -->
     <div id="login-container">
         <div class="admin-login-card">
-            <div class="terracotta-badge-large">
-                <img src="/IMG000.jpg" alt="Logo" class="gate-logo">
-            </div>
-            <h2>Hidar Coffee</h2>
+            <img src="/madiga_logo.png" alt="Madiga Logo" style="height: 72px; width: auto; object-fit: contain; margin-bottom: 16px;">
+            <h2>Madiga Cafe & Restaurant</h2>
             <p style="color: var(--muted-plum); font-size: 0.9rem; margin-top: 4px;">Admin Portal</p>
             <input type="password" id="admin-pass" class="admin-input" placeholder="Password">
             <button id="login-btn" class="admin-btn">Login</button>
@@ -210,9 +209,10 @@
     <div id="admin-workspace" class="admin-container hidden">
         <header class="admin-header">
             <div>
-                <h1>Hidar Menu Manager</h1>
+                <h1>Madiga Menu Manager</h1>
                 <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; color: var(--muted-plum);">Addis Ababa Admin Console</p>
             </div>
+            <img src="/madiga_logo.png" alt="Madiga Logo" style="height: 56px; width: auto; object-fit: contain; position: absolute; left: 50%; transform: translateX(-50%);">
             <button id="logout-btn" class="logout-btn">Logout</button>
         </header>
 

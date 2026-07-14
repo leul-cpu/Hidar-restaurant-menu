@@ -1,23 +1,24 @@
-/* Premium, High-End CSS Styling for Hidar Coffee Digital Menu */
+/* Premium, High-End CSS Styling for Madiga Cafe & Restaurant Digital Menu */
 
 :root {
-    --terracotta: #B33925;
-    --terracotta-light: #C94C37;
-    --terracotta-dark: #8E2917;
-    --cream-bg: #FCFAF5;
-    --cream-paper: #F6F1E5;
-    --cream-accent: #EFEAD8;
-    --navy-purple: #1A1429;
-    --plum-text: #2D233C;
-    --muted-plum: #6D637C;
-    --gold: #D2AD69;
-    --gold-dark: #B9934E;
-    --watermark-orange: rgba(179, 57, 37, 0.035);
-    --shadow-sm: 0 2px 8px rgba(26, 20, 41, 0.04);
-    --shadow-md: 0 8px 30px rgba(26, 20, 41, 0.06);
-    --shadow-lg: 0 16px 40px rgba(26, 20, 41, 0.1);
+    --terracotta: #6B8E23; /* Sage/Olive Green */
+    --terracotta-light: #8FBC8F;
+    --terracotta-dark: #556B2F;
+    --cream-bg: #FCFBF8;
+    --cream-paper: #F5F4F0;
+    --cream-accent: #EBEAE4;
+    --navy-purple: #1A202C; /* Deep charcoal/soft black */
+    --plum-text: #2D3748; /* Deep charcoal */
+    --muted-plum: #4A5568;
+    --gold: #A3B18A;
+    --gold-dark: #588157;
+    --watermark-orange: rgba(10, 60, 37, 0.025);
+    --shadow-sm: 0 2px 8px rgba(14, 46, 30, 0.04);
+    --shadow-md: 0 8px 30px rgba(14, 46, 30, 0.06);
+    --shadow-lg: 0 16px 40px rgba(14, 46, 30, 0.1);
     --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 
 * {
     box-sizing: border-box;
@@ -28,11 +29,15 @@
 body {
     background-color: var(--cream-bg);
     color: var(--plum-text);
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
     line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
 }
 
 /* Elegant Paper Texture Overlay */
@@ -89,8 +94,8 @@ body {
 
 .gate-content {
     background: var(--cream-bg);
-    border: 2px solid var(--gold);
-    border-radius: 16px;
+    border: 1px solid var(--gold);
+    border-radius: 12px;
     padding: 48px 32px;
     max-width: 420px;
     box-shadow: var(--shadow-lg);
@@ -203,67 +208,36 @@ body {
     border-right: 1px solid rgba(210, 173, 105, 0.15);
 }
 
-/* Header */
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 24px 20px;
-    background: var(--cream-bg);
+/* Hero Section */
+.hero-section {
+    width: 100%;
     position: relative;
-}
-
-.app-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 24px;
-    right: 24px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(210, 173, 105, 0.3), transparent);
-}
-
-.logo-container {
+    background-color: var(--cream-bg);
+    border-bottom: 1px solid rgba(210, 173, 105, 0.15);
+    padding: 16px 24px;
     display: flex;
     align-items: center;
-    gap: 14px;
 }
 
-.brand-title {
-    font-family: 'Cinzel', 'Playfair Display', 'Georgia', serif;
-    font-size: 1.8rem;
+.logo-overlay {
+    display: flex;
+    align-items: center;
+}
+
+.hero-logo-icon {
+    height: 72px;
+    width: auto;
+    object-fit: contain;
+}
+
+.hero-brand-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
     font-weight: 800;
     letter-spacing: 0.18em;
-    background: linear-gradient(135deg, var(--terracotta), var(--terracotta-dark));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--navy-purple);
     margin: 0;
-    text-shadow: 1px 1px 0px rgba(210, 173, 105, 0.15);
-}
-
-.terracotta-badge {
-    background: linear-gradient(135deg, var(--terracotta), var(--terracotta-dark));
-    border-radius: 50%;
-    width: 60px; /* slightly smaller to fit text elegantly */
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 16px rgba(179, 57, 37, 0.2);
-    border: 2px solid var(--gold);
-    padding: 3px;
-    transition: transform var(--transition);
-}
-
-.terracotta-badge:hover {
-    transform: scale(1.05);
-}
-
-.menu-logo {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
+    text-transform: uppercase;
 }
 
 .table-info {
@@ -272,8 +246,8 @@ body {
     display: flex;
     flex-direction: column;
     background: var(--cream-paper);
-    padding: 6px 14px;
-    border-radius: 30px;
+    padding: 8px 16px;
+    border-radius: 12px;
     border: 1px solid rgba(210, 173, 105, 0.25);
     box-shadow: var(--shadow-sm);
 }
@@ -302,7 +276,7 @@ body {
     background: linear-gradient(135deg, var(--terracotta), var(--terracotta-dark));
     border: 1px solid var(--gold);
     padding: 12px 20px;
-    border-radius: 50px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -365,8 +339,8 @@ body {
     font-weight: 600;
     text-decoration: none;
     color: var(--plum-text);
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 10px 20px;
+    border-radius: 12px;
     background: var(--cream-paper);
     border: 1px solid rgba(210, 173, 105, 0.2);
     transition: var(--transition);
@@ -388,7 +362,7 @@ body {
 /* Main Content Area */
 .menu-main {
     flex: 1;
-    padding: 20px 24px;
+    padding: 40px 32px;
 }
 
 /* Search Bar */
@@ -400,9 +374,9 @@ body {
     width: 100%;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.95rem;
-    padding: 14px 20px;
+    padding: 16px 20px;
     border: 1px solid rgba(210, 173, 105, 0.35);
-    border-radius: 30px;
+    border-radius: 12px;
     background: var(--cream-paper);
     color: var(--plum-text);
     outline: none;
@@ -418,9 +392,9 @@ body {
 
 /* Category Sections */
 .category-section {
-    margin-bottom: 32px;
+    margin-bottom: 48px;
     background: var(--cream-paper);
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid rgba(210, 173, 105, 0.2);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -443,9 +417,10 @@ body {
 }
 
 .category-title {
-    font-size: 1.45rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--navy-purple);
+    font-family: 'Playfair Display', Georgia, serif;
     position: relative;
     display: inline-block;
     letter-spacing: -0.01em;
@@ -702,7 +677,7 @@ body {
     max-width: 552px;
     background: linear-gradient(135deg, var(--terracotta), var(--terracotta-dark));
     color: var(--cream-bg);
-    border-radius: 30px;
+    border-radius: 12px;
     padding: 14px 24px;
     box-shadow: 0 10px 30px rgba(179, 57, 37, 0.35);
     z-index: 500;
@@ -733,7 +708,7 @@ body {
     color: var(--terracotta);
     border: none;
     padding: 8px 18px;
-    border-radius: 20px;
+    border-radius: 8px;
     font-weight: 700;
     font-size: 0.85rem;
     cursor: pointer;
@@ -764,9 +739,9 @@ body {
     background: var(--cream-bg);
     width: 100%;
     max-width: 600px;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    padding: 24px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: 32px 24px;
     box-shadow: 0 -10px 40px rgba(26, 20, 41, 0.15);
     border-top: 4px solid var(--terracotta);
     animation: slideDrawer 0.35s cubic-bezier(0.16, 1, 0.3, 1);
