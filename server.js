@@ -1,12 +1,14 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { MongoClient } = require('mongodb');
 
-// Manually load .env file
+// ---------------------------------------------------------------------------
+// Load .env file manually (works locally; on Vercel use Environment Variables)
+// ---------------------------------------------------------------------------
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) {
-  const envContent = fs.readFileSync(envPath, 'utf8');
-  envContent.split(/\r?\n/).forEach(line => {
+  fs.readFileSync(envPath, 'utf8').split(/\r?\n/).forEach(line => {
     const trimmed = line.trim();
     if (trimmed && !trimmed.startsWith('#')) {
       const index = trimmed.indexOf('=');
@@ -19,111 +21,62 @@ if (fs.existsSync(envPath)) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MadigaAdmin2026';
+const TOKEN_SECRET   = 'madiga-secret-auth-token-12345';
+const STAFF_PIN      = process.env.STAFF_PIN || '1234';
+const MONGODB_URI    = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('ERROR: MONGODB_URI is not set. Add it to your .env file.');
+  process.exit(1);
+}
+
+// ---------------------------------------------------------------------------
+// MongoDB connection (cached at module level for warm serverless reuse)
+// ---------------------------------------------------------------------------
+let cachedClient = null;
+
+async function getDb() {
+  if (cachedClient) return cachedClient.db();
+  const client = new MongoClient(MONGODB_URI);
+  await client.connect();
+  cachedClient = client;
+  return client.db();
+}
+
+// ---------------------------------------------------------------------------
+// Express setup
+// ---------------------------------------------------------------------------
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'menu_db.json');
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MadigaAdmin2026';
-const TOKEN_SECRET = 'madiga-secret-auth-token-12345';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Route to serve the logo image from workspace root
 app.get('/IMG000.jpg', (req, res) => {
   res.sendFile(path.join(__dirname, 'IMG000.jpg'));
 });
 
-// Helper to build a flat map of menu items for O(1) lookup
-function buildItemMap() {
-  if (!menuCache || !menuCache.categories) return;
-  itemMap.clear();
-  for (const category of menuCache.categories) {
-    for (const item of category.items) {
-      itemMap.set(item.id, item);
-    }
-  }
-}
-
-// Helper to read menu database
-function readMenu() {
-  if (menuCache) return menuCache;
+// ---------------------------------------------------------------------------
+// GET /api/menu
+// ---------------------------------------------------------------------------
+app.get('/api/menu', async (req, res) => {
   try {
-    const data = fs.readFileSync(DB_FILE, 'utf8');
-    menuCache = JSON.parse(data);
-    buildItemMap();
-    return menuCache;
-  } catch (error) {
-    console.error('Error reading DB:', error);
-    return { categories: [] };
+    const db = await getDb();
+    const doc = await db.collection('menu').findOne({ _id: 'menu' });
+    res.json(doc || { categories: [] });
+  } catch (err) {
+    console.error('GET /api/menu error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load menu' });
   }
-}
-
-// Helper to write menu database
-function writeMenu(data) {
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
-    menuCache = data;
-    buildItemMap();
-    return true;
-  } catch (error) {
-    console.error('Error writing DB:', error);
-    return false;
-  }
-}
-
-const ORDERS_FILE = path.join(__dirname, 'orders_db.json');
-const STAFF_PIN = process.env.STAFF_PIN || '1234';
-
-// Helper to build order lookup maps and caches
-function buildOrdersCache() {
-  if (!ordersCache) return;
-  ordersMap.clear();
-  for (const order of ordersCache) {
-    ordersMap.set(order.id, order);
-  }
-  // Pre-calculate active orders for the frequently polled staff dashboard
-  activeOrdersCache = ordersCache.filter(order => order.status !== 'served');
-}
-
-// Helper to read orders database
-function readOrders() {
-  if (ordersCache) return ordersCache;
-  try {
-    if (!fs.existsSync(ORDERS_FILE)) {
-      fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2), 'utf8');
-      ordersCache = [];
-      buildOrdersCache();
-      return [];
-    }
-    const data = fs.readFileSync(ORDERS_FILE, 'utf8');
-    ordersCache = JSON.parse(data);
-    buildOrdersCache();
-    return ordersCache;
-  } catch (error) {
-    console.error('Error reading Orders DB:', error);
-    return [];
-  }
-}
-
-// Helper to write orders database
-function writeOrders(data) {
-  try {
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(data, null, 2), 'utf8');
-    ordersCache = data;
-    buildOrdersCache();
-    return true;
-  } catch (error) {
-    console.error('Error writing Orders DB:', error);
-    return false;
-  }
-}
-
-// Get entire menu
-app.get('/api/menu', (req, res) => {
-  res.json(readMenu());
 });
 
-// Admin login
+// ---------------------------------------------------------------------------
+// POST /api/admin/login
+// ---------------------------------------------------------------------------
 app.post('/api/admin/login', (req, res) => {
   const { password } = req.body;
   if (password === ADMIN_PASSWORD) {
@@ -133,83 +86,97 @@ app.post('/api/admin/login', (req, res) => {
   }
 });
 
-// Admin menu update endpoint
-app.post('/api/admin/menu', (req, res) => {
+// ---------------------------------------------------------------------------
+// POST /api/admin/menu — update a single item
+// ---------------------------------------------------------------------------
+app.post('/api/admin/menu', async (req, res) => {
   const token = req.headers['authorization'];
   if (token !== `Bearer ${TOKEN_SECRET}`) {
     return res.status(403).json({ success: false, message: 'Unauthorized access' });
   }
 
   const { itemId, name, price, available } = req.body;
-  const menu = readMenu();
 
-  // Optimization: use O(1) itemMap lookup instead of O(N*M) nested loops
-  const item = itemMap.get(itemId);
+  try {
+    const db = await getDb();
+    const doc = await db.collection('menu').findOne({ _id: 'menu' });
+    if (!doc) return res.status(404).json({ success: false, message: 'Menu not found' });
 
-  if (item) {
-    if (name !== undefined) item.name = name;
-    if (price !== undefined) item.price = Number(price);
-    if (available !== undefined) item.available = Boolean(available);
-
-    if (writeMenu(menu)) {
-      res.json({ success: true, message: 'Item updated successfully' });
-    } else {
-      res.status(500).json({ success: false, message: 'Failed to write to database' });
+    let found = false;
+    for (const cat of doc.categories) {
+      const item = cat.items.find(i => i.id === itemId);
+      if (item) {
+        if (name      !== undefined) item.name      = name;
+        if (price     !== undefined) item.price     = Number(price);
+        if (available !== undefined) item.available = Boolean(available);
+        found = true;
+        break;
+      }
     }
-  } else {
-    res.status(404).json({ success: false, message: 'Item not found' });
+
+    if (!found) return res.status(404).json({ success: false, message: 'Item not found' });
+
+    await db.collection('menu').replaceOne({ _id: 'menu' }, doc);
+    res.json({ success: true, message: 'Item updated successfully' });
+  } catch (err) {
+    console.error('POST /api/admin/menu error:', err);
+    res.status(500).json({ success: false, message: 'Failed to update item' });
   }
 });
 
-// Place order
-app.post('/api/orders', (req, res) => {
-  const { table, items } = req.body; // items: [{ itemId, quantity }]
+// ---------------------------------------------------------------------------
+// POST /api/orders — place a new order
+// ---------------------------------------------------------------------------
+app.post('/api/orders', async (req, res) => {
+  const { table, items } = req.body;
   if (!table || !items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ success: false, message: 'Invalid order parameters' });
   }
 
-  const menu = readMenu();
-  const orders = readOrders();
-  const orderItems = [];
-  let total = 0;
+  try {
+    const db = await getDb();
+    const menuDoc = await db.collection('menu').findOne({ _id: 'menu' });
+    if (!menuDoc) return res.status(500).json({ success: false, message: 'Menu not available' });
 
-  for (let orderItem of items) {
-    // Optimization: use O(1) itemMap lookup instead of O(N*M) nested loops
-    const menuItem = itemMap.get(orderItem.itemId);
-
-    if (!menuItem || !menuItem.available) {
-      return res.status(400).json({ success: false, message: `Item ${orderItem.itemId} is unavailable` });
+    const itemMap = new Map();
+    for (const cat of menuDoc.categories) {
+      for (const item of cat.items) itemMap.set(item.id, item);
     }
 
-    const qty = Number(orderItem.quantity) || 1;
-    orderItems.push({
-      id: menuItem.id,
-      name: menuItem.name,
-      price: menuItem.price,
-      quantity: qty
-    });
-    total += menuItem.price * qty;
-  }
+    const orderItems = [];
+    let total = 0;
 
-  const orderId = `HDR-${Math.floor(1000 + Math.random() * 9000)}`;
-  const newOrder = {
-    id: orderId,
-    table: String(table),
-    items: orderItems,
-    status: 'pending', // pending, preparing, ready, served
-    total: total,
-    timestamp: new Date().toISOString()
-  };
+    for (const orderItem of items) {
+      const menuItem = itemMap.get(orderItem.itemId);
+      if (!menuItem || !menuItem.available) {
+        return res.status(400).json({ success: false, message: `Item ${orderItem.itemId} is unavailable` });
+      }
+      const qty = Number(orderItem.quantity) || 1;
+      orderItems.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, quantity: qty });
+      total += menuItem.price * qty;
+    }
 
-  orders.push(newOrder);
-  if (writeOrders(orders)) {
+    const orderId = `MDG-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newOrder = {
+      id: orderId,
+      table: String(table),
+      items: orderItems,
+      status: 'pending',
+      total,
+      timestamp: new Date().toISOString()
+    };
+
+    await db.collection('orders').insertOne(newOrder);
     res.json({ success: true, orderId });
-  } else {
+  } catch (err) {
+    console.error('POST /api/orders error:', err);
     res.status(500).json({ success: false, message: 'Failed to save order' });
   }
 });
 
-// Staff PIN login
+// ---------------------------------------------------------------------------
+// POST /api/staff/login
+// ---------------------------------------------------------------------------
 app.post('/api/staff/login', (req, res) => {
   const { pin } = req.body;
   if (pin === STAFF_PIN) {
@@ -219,45 +186,47 @@ app.post('/api/staff/login', (req, res) => {
   }
 });
 
-// Get all orders (Staff Dashboard view)
-app.get('/api/orders', (req, res) => {
+// ---------------------------------------------------------------------------
+// GET /api/orders — staff: all orders
+// ---------------------------------------------------------------------------
+app.get('/api/orders', async (req, res) => {
   const pin = req.headers['x-staff-pin'];
   if (pin !== STAFF_PIN) {
     return res.status(403).json({ success: false, message: 'Unauthorized staff access' });
   }
 
-  // Optimization: Server-side filtering to reduce payload size as order history grows
-  const { tab } = req.query;
-  let orders = readOrders();
-
-  if (tab === 'active') {
-    // ⚡ Bolt: Return pre-filtered active orders cache for O(1) response
-    // since this endpoint is polled every 3 seconds by the staff dashboard.
-    return res.json(activeOrdersCache || []);
-  } else if (tab === 'served') {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    orders = orders.filter(order => {
-      return order.status === 'served' && new Date(order.timestamp) >= twentyFourHoursAgo;
-    });
-  }
-
-  res.json(orders);
-});
-
-// Get single order status (Customer view)
-app.get('/api/orders/:orderId', (req, res) => {
-  readOrders();
-  // ⚡ Bolt: Use O(1) ordersMap lookup instead of O(N) find
-  const order = ordersMap.get(req.params.orderId);
-  if (order) {
-    res.json(order);
-  } else {
-    res.status(404).json({ success: false, message: 'Order not found' });
+  try {
+    const db = await getDb();
+    const orders = await db.collection('orders').find({}).sort({ timestamp: -1 }).toArray();
+    res.json(orders);
+  } catch (err) {
+    console.error('GET /api/orders error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load orders' });
   }
 });
 
-// Update order status (Staff Dashboard action)
-app.post('/api/orders/:orderId/status', (req, res) => {
+// ---------------------------------------------------------------------------
+// GET /api/orders/:orderId — customer: track single order
+// ---------------------------------------------------------------------------
+app.get('/api/orders/:orderId', async (req, res) => {
+  try {
+    const db = await getDb();
+    const order = await db.collection('orders').findOne({ id: req.params.orderId });
+    if (order) {
+      res.json(order);
+    } else {
+      res.status(404).json({ success: false, message: 'Order not found' });
+    }
+  } catch (err) {
+    console.error('GET /api/orders/:orderId error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch order' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/orders/:orderId/status — staff: update order status
+// ---------------------------------------------------------------------------
+app.post('/api/orders/:orderId/status', async (req, res) => {
   const pin = req.headers['x-staff-pin'];
   if (pin !== STAFF_PIN) {
     return res.status(403).json({ success: false, message: 'Unauthorized staff access' });
@@ -269,26 +238,27 @@ app.post('/api/orders/:orderId/status', (req, res) => {
     return res.status(400).json({ success: false, message: 'Invalid status value' });
   }
 
-  const orders = readOrders();
-  // ⚡ Bolt: Use O(1) ordersMap lookup instead of O(N) find
-  const order = ordersMap.get(req.params.orderId);
-
-  if (order) {
-    order.status = status;
-    if (writeOrders(orders)) {
-      res.json({ success: true, message: 'Order status updated successfully' });
-    } else {
-      res.status(500).json({ success: false, message: 'Failed to save updates' });
+  try {
+    const db = await getDb();
+    const result = await db.collection('orders').updateOne(
+      { id: req.params.orderId },
+      { $set: { status } }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
-  } else {
-    res.status(404).json({ success: false, message: 'Order not found' });
+    res.json({ success: true, message: 'Order status updated successfully' });
+  } catch (err) {
+    console.error('POST /api/orders/:orderId/status error:', err);
+    res.status(500).json({ success: false, message: 'Failed to update order status' });
   }
 });
 
-// Warm up the caches on startup
-readMenu();
-readOrders();
-
+// ---------------------------------------------------------------------------
+// Start server
+// ---------------------------------------------------------------------------
 app.listen(PORT, () => {
   console.log(`Madiga Cafe & Restaurant server running at http://localhost:${PORT}`);
 });
+
+module.exports = app; // required by Vercel

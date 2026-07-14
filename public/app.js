@@ -4,84 +4,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuSections = document.getElementById('menu-sections');
     const searchInput = document.getElementById('menu-search');
 
+    const orderTrackingApp = document.getElementById('order-tracking-app');
+    const trackOrderId = document.getElementById('track-order-id');
+    const trackTableNumber = document.getElementById('track-table-number');
+    const trackTotalPrice = document.getElementById('track-total-price');
+    const trackItemsList = document.getElementById('track-items-list');
+    const trackBackBtn = document.getElementById('track-back-btn');
+    
+    const staffDashboardApp = document.getElementById('staff-dashboard-app');
+    const staffLoginContainer = document.getElementById('staff-login-container');
+    const staffWorkspace = document.getElementById('staff-workspace');
+    const staffLoginBtn = document.getElementById('staff-login-btn');
+    const staffPinInput = document.getElementById('staff-pin-input');
+    const staffLoginError = document.getElementById('staff-login-error');
+    const staffLogoutBtn = document.getElementById('staff-logout-btn');
+    const staffOrdersList = document.getElementById('staff-orders-list');
+
     // App State
     let menuData = null;
     let cart = {}; // itemId -> quantity
     let activePollInterval = null;
     let currentStaffTab = 'active'; // 'active' or 'served'
 
-    // ==========================================================================
-    // Routing & SPA View Manager
-    // ==========================================================================
-    function handleRouting() {
-        // Clear any running polling intervals
-        if (activePollInterval) {
-            clearInterval(activePollInterval);
-            activePollInterval = null;
-        }
-
-        const hash = window.location.hash;
-
-        // Hide all views first
-        menuApp.classList.add('hidden');
-        orderTrackingApp.classList.add('hidden');
-        staffDashboardApp.classList.add('hidden');
-
-        if (hash.startsWith('#/order/')) {
-            // Render Order Tracking View
-            const orderId = hash.replace('#/order/', '');
-            showOrderTracking(orderId);
-        } else if (hash === '#/staff') {
-            // Render Staff View
-            showStaffDashboard();
-        } else {
-            // Render Main Menu View
-            // QR gate check
-            if (!tableToken || tableToken.trim() === '') {
-                qrGate.classList.remove('hidden');
-            } else {
-                qrGate.classList.add('hidden');
-                menuApp.classList.remove('hidden');
-                tableNumberEl.textContent = tableToken.trim();
-                if (!menuData) {
-                    loadMenu();
-                } else {
-                    renderMenu(menuData);
-                }
-            }
-        }
-    }
-
-    window.addEventListener('hashchange', handleRouting);
-    // Trigger router on initial load
-    setTimeout(handleRouting, 50);
-
-    // ==========================================================================
-    // Main Menu & Cart Flow
-    // ==========================================================================
     async function loadMenu() {
         try {
             const response = await fetch('/api/menu');
             if (!response.ok) throw new Error('Network response was not ok');
             menuData = await response.json();
-            buildMenuItemMap();
             renderMenu(menuData);
             setupScrollSpy();
         } catch (error) {
             console.error('Error fetching menu:', error);
-            menuSections.innerHTML = `
-                <div class="loading-state">
-                    <p style="color: var(--terracotta); font-weight: bold;">Could not load menu.</p>
-                    <p style="font-size: 0.9rem; margin-top: 8px;">Please check connection and reload.</p>
-                </div>
-            `;
+            if (menuSections) {
+                menuSections.innerHTML = `
+                    <div class="loading-state">
+                        <p style="color: var(--terracotta); font-weight: bold;">Could not load menu.</p>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Please check connection and reload.</p>
+                    </div>
+                `;
+            }
         }
     }
 
-    // Render Menu Categories and Items
+    loadMenu();
+
     function renderMenu(data) {
-        navCategories.innerHTML = '';
-        menuSections.innerHTML = '';
+        if (navCategories) navCategories.innerHTML = '';
+        if (menuSections) menuSections.innerHTML = '';
 
         data.categories.forEach(category => {
             // Category navigation link
@@ -198,23 +167,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (totalCount > 0) {
-            cartBar.classList.remove('hidden');
-            cartCountEl.textContent = `${totalCount} item${totalCount > 1 ? 's' : ''} selected`;
+            if (cartBar) cartBar.classList.remove('hidden');
+            if (cartCountEl) cartCountEl.textContent = `${totalCount} item${totalCount > 1 ? 's' : ''} selected`;
         } else {
-            cartBar.classList.add('hidden');
+            if (cartBar) cartBar.classList.add('hidden');
         }
 
-        cartTotalPrice.textContent = `${totalPrice} ETB`;
+        if (cartTotalPrice) cartTotalPrice.textContent = `${totalPrice} ETB`;
     }
 
     // Cart Modal Logic
-    viewCartBtn.addEventListener('click', () => {
+    const viewCartBtn   = document.getElementById('view-cart-btn');
+    const closeCartBtn  = document.getElementById('close-cart-btn');
+    const cartBar       = document.getElementById('cart-bar');
+    const cartCountEl   = document.getElementById('cart-count');
+    const cartTotalPrice= document.getElementById('cart-total-price');
+    const cartModal     = document.getElementById('cart-modal');
+    const cartItemsList = document.getElementById('cart-items-list');
+    const submitOrderBtn= document.getElementById('submit-order-btn');
+    const tableToken    = (new URLSearchParams(window.location.search)).get('table') || 'Walk-in';
+
+    if (viewCartBtn) viewCartBtn.addEventListener('click', () => {
         renderCartModal();
-        cartModal.classList.remove('hidden');
+        if (cartModal) cartModal.classList.remove('hidden');
     });
 
-    closeCartBtn.addEventListener('click', () => {
-        cartModal.classList.add('hidden');
+    if (closeCartBtn) closeCartBtn.addEventListener('click', () => {
+        if (cartModal) cartModal.classList.add('hidden');
     });
 
     function renderCartModal() {
@@ -260,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Submit Order
-    submitOrderBtn.addEventListener('click', async () => {
+    if (submitOrderBtn) submitOrderBtn.addEventListener('click', async () => {
         const orderItems = [];
         for (let itemId in cart) {
             orderItems.push({ itemId, quantity: cart[itemId] });
@@ -283,15 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             if (data.success) {
-                // Clear cart
                 cart = {};
                 updateCartState();
-                cartModal.classList.add('hidden');
-
-                // Save orderId so the Track Order button works without needing input
+                if (cartModal) cartModal.classList.add('hidden');
                 localStorage.setItem('hidar_last_order_id', data.orderId);
-
-                // Redirect to Tracking
                 window.location.hash = `#/order/${data.orderId}`;
             } else {
                 alert('Order Failed: ' + data.message);
@@ -305,8 +279,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Helper: Debounce to limit execution rate
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     // Search bar functionality with debounce and optimized filtering
-    searchInput.addEventListener('input', debounce((e) => {
+    if (searchInput) searchInput.addEventListener('input', debounce((e) => {
         const query = e.target.value.toLowerCase().trim();
         if (!menuData) return;
 
@@ -469,9 +452,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    trackBackBtn.addEventListener('click', () => {
-        window.location.hash = '';
-    });
+    if (trackBackBtn) {
+        trackBackBtn.addEventListener('click', () => {
+            window.location.hash = '';
+        });
+    }
 
     // ==========================================================================
     // Track Order Quick-Lookup Modal (from header button — auto-loads last order)
@@ -579,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    staffLoginBtn.addEventListener('click', async () => {
+    if (staffLoginBtn) staffLoginBtn.addEventListener('click', async () => {
         const pin = staffPinInput.value;
         try {
             const res = await fetch('/api/staff/login', {
@@ -604,11 +589,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    staffLogoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('hidar_staff_pin');
-        staffPin = null;
-        window.location.reload();
-    });
+    if (staffLogoutBtn) {
+        staffLogoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('hidar_staff_pin');
+            staffPin = null;
+            window.location.reload();
+        });
+    }
 
     async function loadStaffOrders() {
         try {
