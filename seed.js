@@ -36,7 +36,7 @@ const menuData = {
       id: 'breakfast-brunch',
       name: 'Breakfast & Brunch',
       items: [
-        { id: 'bb-001', name: 'Chicken Pesto Croissant',          price: 800,  available: true },
+        { id: 'bb-001', name: 'Chicken Pesto Croissant',          price: 800,  available: true, image: '/Chicken Pesto Croissant.jpeg' },
         { id: 'bb-002', name: 'Avocado Boiled Egg Croissant',     price: 520,  available: true },
         { id: 'bb-003', name: 'Cheese Croissant Sandwich',        price: 480,  available: true },
         { id: 'bb-004', name: 'Egg Croissant Sandwich',           price: 450,  available: true },

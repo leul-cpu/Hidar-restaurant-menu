@@ -486,76 +486,116 @@ h1, h2, h3, h4, h5, h6 {
     pointer-events: none;
 }
 
-/* Menu Items List - Classic Print Style with Dotted Leader Lines */
+/* Menu Items List — Card layout with image thumbnail */
 .items-list {
     list-style: none;
     padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 
 .menu-item-wrapper {
     position: relative;
-    padding: 10px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: clamp(0.88rem, 3.5vw, 1.05rem);
-    line-height: 1.4;
     transition: opacity 0.25s ease;
 }
 
 .menu-item-wrapper:not(:last-child) {
-    border-bottom: 1px dashed rgba(210, 173, 105, 0.15);
+    border-bottom: 1px solid rgba(210, 173, 105, 0.12);
 }
 
 .menu-item-wrapper.unavailable {
-    opacity: 0.4;
+    opacity: 0.45;
 }
 
-.item-name-desc {
-    flex: 1;
+/* ── Card row ── */
+.item-card {
     display: flex;
-    align-items: baseline;
-    min-width: 0; /* critical: allows flex child to shrink below content size */
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+}
+
+/* ── Square thumbnail ── */
+.item-thumb {
+    flex-shrink: 0;
+    width: 62px;
+    height: 62px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e8f0e0 0%, #d4e4c0 100%);
+    border: 1px solid rgba(163, 177, 138, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(14, 46, 30, 0.07);
+    position: relative;
+}
+
+.item-thumb--unavailable {
+    filter: grayscale(60%);
+    opacity: 0.7;
+}
+
+.item-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 11px;
+    display: block;
+}
+
+.item-thumb-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+    user-select: none;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+}
+
+/* ── Text body ── */
+.item-card-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     gap: 4px;
+}
+
+.item-card-row {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .item-name {
     font-weight: 700;
     color: var(--plum-text);
-    white-space: normal;   /* allow wrapping */
+    font-size: clamp(0.88rem, 3.5vw, 1rem);
+    line-height: 1.35;
     word-break: break-word;
-    flex-shrink: 1;
-    min-width: 0;
 }
 
-/* Elegant Dotted Leader Line for Printed Menu Aesthetic */
-.item-leader-dots {
-    flex: 1;
-    border-bottom: 2px dotted rgba(210, 173, 105, 0.3);
-    margin: 0 6px;
-    height: 1px;
-    align-self: flex-end;
-    margin-bottom: 4px;
-    min-width: 10px;
+.item-card-price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .item-price {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--terracotta);
-    font-size: clamp(0.82rem, 3vw, 1rem);
-    white-space: nowrap;
-    flex-shrink: 0; /* price never shrinks */
-    align-self: flex-end;
+    font-size: clamp(0.82rem, 3.2vw, 0.95rem);
+    letter-spacing: 0.01em;
 }
 
 .item-price::after {
-    content: " .–";
-    font-size: 0.95rem;
+    content: " ETB";
+    font-size: 0.72rem;
     font-weight: 600;
-    color: var(--gold-dark);
+    color: var(--muted-plum);
+    letter-spacing: 0.04em;
 }
 
 .item-status-tag {
@@ -1226,8 +1266,18 @@ h1, h2, h3, h4, h5, h6 {
         padding: 7px 11px;
     }
 
-    .item-leader-dots {
-        min-width: 6px;
-        margin: 0 4px;
+    /* Slightly smaller thumbnail on tiny phones */
+    .item-thumb {
+        width: 52px;
+        height: 52px;
+        border-radius: 10px;
+    }
+
+    .item-thumb-icon {
+        font-size: 1.5rem;
+    }
+
+    .item-card {
+        gap: 10px;
     }
 }

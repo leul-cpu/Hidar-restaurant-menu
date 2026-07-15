@@ -118,13 +118,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusTag = '<span class="item-status-tag">Sold Out</span>';
                 }
 
+                // Pick a food emoji based on category name for the placeholder
+                const catName = category.name.toLowerCase();
+                let placeholderIcon = '🍽️';
+                if (catName.includes('breakfast') || catName.includes('brunch')) placeholderIcon = '🍳';
+                else if (catName.includes('sandwich') || catName.includes('burger')) placeholderIcon = '🥪';
+                else if (catName.includes('pasta') || catName.includes('grilled')) placeholderIcon = '🍝';
+                else if (catName.includes('salad')) placeholderIcon = '🥗';
+                else if (catName.includes('juice') || catName.includes('smoothie')) placeholderIcon = '🧃';
+                else if (catName.includes('beverage')) placeholderIcon = '☕';
+                else if (catName.includes('pastry') || catName.includes('bakery')) placeholderIcon = '🥐';
+
                 li.innerHTML = `
-                    <div class="item-name-desc">
-                        <span class="item-name">${item.name}</span>
-                        ${statusTag}
-                        <span class="item-leader-dots"></span>
+                    <div class="item-card">
+                        <div class="item-thumb ${!item.available ? 'item-thumb--unavailable' : ''}">
+                            ${item.image
+                                ? `<img src="${item.image}" alt="${item.name}" class="item-thumb-img" loading="lazy">`
+                                : `<span class="item-thumb-icon">${placeholderIcon}</span>`
+                            }
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-card-row">
+                                <span class="item-name">${item.name}</span>
+                                ${statusTag}
+                            </div>
+                            <div class="item-card-price-row">
+                                <span class="item-price">${item.price}</span>
+                            </div>
+                        </div>
                     </div>
-                    <span class="item-price">${item.price} ETB</span>
                 `;
                 list.appendChild(li);
             });
