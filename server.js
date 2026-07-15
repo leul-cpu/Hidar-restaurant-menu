@@ -54,9 +54,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// ⚡ Bolt: Cache static assets for 1 day to reduce redundant network requests and improve load times
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
 
 app.get('/IMG000.jpg', (req, res) => {
+  // ⚡ Bolt: Implement browser caching for the static logo
+  res.set('Cache-Control', 'public, max-age=86400');
   res.sendFile(path.join(__dirname, 'IMG000.jpg'));
 });
 
