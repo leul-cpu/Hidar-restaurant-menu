@@ -54,10 +54,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// ⚡ Bolt: Implement browser caching for static assets.
+// Assets in public/ (JS, CSS, images) are cached for 1 day.
+// HTML files are set to must-revalidate to ensure users always get the latest SPA entry point.
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d',
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    }
+  }
+}));
 
 app.get('/IMG000.jpg', (req, res) => {
-  res.sendFile(path.join(__dirname, 'IMG000.jpg'));
+  // ⚡ Bolt: Cache the main logo for 1 day.
+  res.sendFile(path.join(__dirname, 'IMG000.jpg'), { maxAge: '1d' });
 });
 
 // ---------------------------------------------------------------------------
