@@ -362,12 +362,12 @@ h1, h2, h3, h4, h5, h6 {
 /* Main Content Area */
 .menu-main {
     flex: 1;
-    padding: 40px 32px;
+    padding: clamp(16px, 4vw, 40px) clamp(14px, 4vw, 32px);
 }
 
 /* Search Bar */
 .search-bar-container {
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 }
 
 .menu-search-input {
@@ -417,7 +417,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .category-title {
-    font-size: 1.6rem;
+    font-size: clamp(1.2rem, 5vw, 1.6rem);
     font-weight: 800;
     color: var(--navy-purple);
     font-family: 'Playfair Display', Georgia, serif;
@@ -494,11 +494,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .menu-item-wrapper {
     position: relative;
-    padding: 12px 0;
+    padding: 10px 0;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    font-size: 1.05rem;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: clamp(0.88rem, 3.5vw, 1.05rem);
     line-height: 1.4;
     transition: opacity 0.25s ease;
 }
@@ -515,31 +516,39 @@ h1, h2, h3, h4, h5, h6 {
     flex: 1;
     display: flex;
     align-items: baseline;
-    overflow: hidden;
+    min-width: 0; /* critical: allows flex child to shrink below content size */
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .item-name {
     font-weight: 700;
     color: var(--plum-text);
-    white-space: nowrap;
+    white-space: normal;   /* allow wrapping */
+    word-break: break-word;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 /* Elegant Dotted Leader Line for Printed Menu Aesthetic */
 .item-leader-dots {
-    flex-grow: 1;
+    flex: 1;
     border-bottom: 2px dotted rgba(210, 173, 105, 0.3);
-    margin: 0 10px;
+    margin: 0 6px;
     height: 1px;
     align-self: flex-end;
     margin-bottom: 4px;
+    min-width: 10px;
 }
 
 .item-price {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
     color: var(--terracotta);
-    font-size: 1rem;
+    font-size: clamp(0.82rem, 3vw, 1rem);
     white-space: nowrap;
+    flex-shrink: 0; /* price never shrinks */
+    align-self: flex-end;
 }
 
 .item-price::after {
@@ -1157,4 +1166,68 @@ h1, h2, h3, h4, h5, h6 {
     background: rgba(210, 173, 105, 0.3);
     min-width: 16px;
     margin-bottom: 22px; /* pushes line up to align with dots */
+}
+/* ==========================================================================
+   Responsive Mobile Overrides (phones of all sizes)
+   ========================================================================== */
+@media (max-width: 480px) {
+    .category-items {
+        padding: 4px 14px 16px;
+    }
+
+    .category-header {
+        padding: 14px 14px;
+    }
+
+    .nav-scroll-container {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .nav-item {
+        font-size: 0.78rem;
+        padding: 8px 14px;
+    }
+
+    .menu-search-input {
+        padding: 13px 16px;
+        font-size: 0.9rem;
+    }
+
+    .category-section {
+        margin-bottom: 28px;
+    }
+
+    .hero-logo-icon {
+        height: 56px;
+    }
+
+    .app-footer {
+        padding: 24px 16px;
+    }
+}
+
+/* Extra small phones (iPhone SE, 320px wide) */
+@media (max-width: 360px) {
+    .menu-main {
+        padding: 14px 12px;
+    }
+
+    .category-header {
+        padding: 12px 12px;
+    }
+
+    .category-items {
+        padding: 4px 10px 14px;
+    }
+
+    .nav-item {
+        font-size: 0.72rem;
+        padding: 7px 11px;
+    }
+
+    .item-leader-dots {
+        min-width: 6px;
+        margin: 0 4px;
+    }
 }
